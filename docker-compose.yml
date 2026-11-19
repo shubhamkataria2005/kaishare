@@ -1,0 +1,23 @@
+# Local MongoDB replica set for development and testing.
+#   docker compose up -d
+# Connection string (see server/.env.example):
+#   mongodb://127.0.0.1:27017,127.0.0.1:27018,127.0.0.1:27019/kaishare?replicaSet=rs0
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: kaishare-mongo-rs
+    entrypoint: ['/bin/bash', '/scripts/mongo-replica-entrypoint.sh']
+    ports:
+      - '27017:27017'
+      - '27018:27018'
+      - '27019:27019'
+    volumes:
+      - ./docker/mongo-replica-entrypoint.sh:/scripts/mongo-replica-entrypoint.sh:ro
+      - mongo-data:/data/rs
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--port', '27017', '--eval', 'db.hello().isWritablePrimary || db.hello().secondary']
+      interval: 10s
+      retries: 10
+
+volumes:
+  mongo-data:
