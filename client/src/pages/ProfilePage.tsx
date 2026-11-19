@@ -11,6 +11,7 @@ import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import { usePushNotifications } from '../hooks/usePushNotifications'
 import { getStorageSummary } from '../offline/offlineCache'
 import type { FieldErrors } from '../types'
+import { pluralise } from '../utils/format'
 import { getRecentLogs } from '../utils/logger'
 
 export function ProfilePage() {
@@ -219,7 +220,7 @@ function OfflinePanel() {
           {info.caches.map((cache) => (
             <div key={cache.name}>
               <dt>Cache: {cache.name}</dt>
-              <dd>{cache.entries} files</dd>
+              <dd>{pluralise(cache.entries, 'file')}</dd>
             </div>
           ))}
           <div>
