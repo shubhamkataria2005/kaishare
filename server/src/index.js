@@ -22,6 +22,17 @@ async function start() {
     ? https.createServer({ key: readFileSync(config.https.keyFile), cert: readFileSync(config.https.certFile) }, app)
     : http.createServer(app)
 
+  // A clear message instead of an unhandled 'error' crash when the port is taken
+  // (for example by another copy of the API that is still running).
+  server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      logger.error(`Port ${config.port} is already in use. Stop the other process (lsof -i :${config.port}) or set PORT in .env.`)
+    } else {
+      logger.error(`HTTP server error: ${error.message}`)
+    }
+    process.exit(1)
+  })
+
   server.listen(config.port, () => {
     logger.info(`KaiShare API listening on ${useHttps ? 'https' : 'http'}://localhost:${config.port} (${config.env})`)
     if (!container.services.notifications.sender.isConfigured) {
